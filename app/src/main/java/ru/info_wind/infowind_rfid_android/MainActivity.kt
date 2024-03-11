@@ -87,6 +87,8 @@ class MainActivity : AppCompatActivity() {
                 .getPackageInfo(applicationContext.getPackageName(), 0)
         title = "InfoWind RFID " + packageInfo.versionName
 
+        log(title.toString())
+
         ssidInput = findViewById(R.id.ssidInput)
         passInput = findViewById(R.id.passInput)
         hostInput = findViewById(R.id.hostInput)
@@ -442,7 +444,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun status(arg: String?, vararg args: String?) {
-        log(arg, *args)
         runUI {
             statusView.setText(arg)
             for (more in args) {

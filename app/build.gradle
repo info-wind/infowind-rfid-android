@@ -12,7 +12,7 @@ android {
         applicationId "ru.info_wind.infowind_rfid_android"
         minSdk 25
         targetSdk 34
-        versionName "1.8.1"
+        versionName "1.8.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
