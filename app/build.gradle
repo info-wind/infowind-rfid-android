@@ -10,9 +10,9 @@ android {
 
     defaultConfig {
         applicationId "ru.info_wind.infowind_rfid_android"
-        minSdk 25
+        minSdk 30
         targetSdk 34
-        versionName "1.8.2"
+        versionName "1.9.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -1,17 +1,13 @@
 package ru.info_wind.infowind_rfid_android
 
+import android.content.Context
 import android.content.DialogInterface
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.net.wifi.SupplicantState
-import android.net.wifi.WifiConfiguration
-import android.net.wifi.WifiManager
-import android.os.Build
+import android.net.wifi.WifiNetworkSpecifier
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -26,13 +22,16 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.net.ConnectException
+import java.net.HttpURLConnection
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketAddress
+import java.net.SocketTimeoutException
+import java.net.URL
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var hostInput: EditText
     lateinit var portInput: EditText
     lateinit var heartbeatBtn: Button
+    lateinit var lteBtn: Button
+    lateinit var wifiBtn: Button
     lateinit var atBtn: Button
     lateinit var versionBtn: Button
     lateinit var syncBtn: Button
@@ -59,11 +60,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var sendBtn: Button
     lateinit var logView: TextView
     lateinit var statusView: TextView
+    lateinit var connectivityManager: ConnectivityManager
 
     var mainLooperHandler = Handler(Looper.getMainLooper())
 
     var heartbeatHandler = Handler()
     var heartbeatLogEnabled = false
+
+    var wifiConnectionNeeded = false
 
     fun setHeartbeatStatusGray() {
         heartbeatBtn.setTextColor(Color.parseColor("#FFAAAAAA"))
@@ -77,11 +81,25 @@ class MainActivity : AppCompatActivity() {
         heartbeatBtn.setTextColor(Color.parseColor("#FFE81224"))
     }
 
+    fun setLTEStatusGray() {
+        lteBtn.setTextColor(Color.parseColor("#FFAAAAAA"))
+    }
+
+    fun setLTEStatusGreen() {
+        lteBtn.setTextColor(Color.parseColor("#FF16C60C"))
+    }
+
+    fun setLTEStatusRed() {
+        lteBtn.setTextColor(Color.parseColor("#FFE81224"))
+    }
+
     var lastTimeMessageRecieved: Long = System.currentTimeMillis()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         val packageInfo = applicationContext.getPackageManager()
                 .getPackageInfo(applicationContext.getPackageName(), 0)
@@ -94,6 +112,8 @@ class MainActivity : AppCompatActivity() {
         hostInput = findViewById(R.id.hostInput)
         portInput = findViewById(R.id.portInput)
         heartbeatBtn = findViewById(R.id.heartbeatBtn)
+        lteBtn = findViewById(R.id.lteBtn)
+        wifiBtn =  findViewById(R.id.wifiBtn)
         atBtn = findViewById(R.id.atBtn)
         versionBtn = findViewById(R.id.versionBtn)
         syncBtn = findViewById(R.id.syncBtn)
@@ -146,7 +166,22 @@ class MainActivity : AppCompatActivity() {
                     .show()
             true
         })
-        heartbeatBtn.setOnClickListener(View.OnClickListener { view: View? -> heartbeatLogEnabled = !heartbeatLogEnabled })
+        heartbeatBtn.setOnClickListener(View.OnClickListener { heartbeatLogEnabled = !heartbeatLogEnabled })
+
+        wifiBtn.setOnClickListener {
+            if (wifiConnectionNeeded == false) {
+                wifiBtn.setText("Unlock \uD83D\uDD13")
+                wifiConnectionNeeded = true
+            } else {
+                wifiBtn.setText("Lock \uD83D\uDD12")
+                wifiConnectionNeeded = false
+            }
+            if (networkCallbackConnected) {
+                connectivityManager.unregisterNetworkCallback(networkCallback)
+                networkCallbackConnected = false
+            }
+            wifiNetwork = null
+        }
 
         val textWatcher = object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -200,16 +235,58 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun ensureConnection() {
+    fun ensureConnection__DEPRECATED__() {
         val connectivityManager = applicationContext.getApplicationContext().getSystemService(
             CONNECTIVITY_SERVICE
         ) as ConnectivityManager
         val networks = connectivityManager.allNetworks
+        log(networks.toString())
         for (network in networks) {
             val networkInfo = connectivityManager.getNetworkInfo(network)
+            log(networkInfo!!.typeName.toString())
             if (networkInfo!!.type == ConnectivityManager.TYPE_WIFI) {
                 wifiNetwork = network // Grabbing the Network object for later usage
             }
+        }
+    }
+
+
+
+
+    var networkCallbackConnected = false
+    val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            log("onAvailable()", network.toString())
+            wifiNetwork = network
+        }
+        override fun onLost(network: Network) {
+            log("onLost()")
+            wifiNetwork = null
+            connectivityManager.unregisterNetworkCallback(this)
+            networkCallbackConnected = false
+        }
+        override fun onUnavailable() {
+            log("onUnavailable()")
+            wifiNetwork = null
+            connectivityManager.unregisterNetworkCallback(this)
+            networkCallbackConnected = false
+        }
+    }
+
+    fun ensureConnection() {
+        if (!networkCallbackConnected) {
+            val wfBuilder = WifiNetworkSpecifier.Builder()
+                .setSsid(ssidInput.text.toString())
+                .setWpa2Passphrase(passInput.text.toString())
+            val nBuilder = NetworkRequest.Builder()
+                //.clearCapabilities()
+                //.setIncludeOtherUidNetworks(true)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            if (wifiConnectionNeeded)
+                nBuilder.setNetworkSpecifier(wfBuilder.build())
+            connectivityManager.requestNetwork(nBuilder.build(), networkCallback)
+            log("NETWROK_REQUESTED()")
+            networkCallbackConnected = true
         }
     }
 
@@ -265,10 +342,10 @@ class MainActivity : AppCompatActivity() {
         if (wifiManager.connectionInfo.supplicantState == SupplicantState.DISCONNECTED) {
             val requestBuilder = NetworkRequest.Builder()
             requestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-            cm.requestNetwork(requestBuilder.build(), object : NetworkCallback() {
+            val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+            connectivityManager.requestNetwork(requestBuilder.build(), object : NetworkCallback() {
                 override fun onAvailable(network: Network) {
-                    cm.bindProcessToNetwork(network)
+                    connectivityManager.bindProcessToNetwork(network)
                 }
                 override fun onUnavailable() {
                     super.onUnavailable()
@@ -313,10 +390,40 @@ class MainActivity : AppCompatActivity() {
         editor.commit()
     }
 
+    var checkLTECounter = 2
+    fun checkLTE() {
+        checkLTECounter = (checkLTECounter + 1) % 3
+        if (checkLTECounter != 0) return
+        val url = URL("https://romanovskii.com/internet_connection")
+        val urlConnection = url.openConnection() as HttpURLConnection
+        urlConnection.connectTimeout = 2500
+        try {
+            val isr = InputStreamReader(urlConnection.inputStream, "UTF-8")
+            val br = BufferedReader(isr)
+            var line = br.readLine()
+            while (line != null) {
+                if (line.startsWith("internet_connected")) {
+                    runUI { setLTEStatusGreen() }
+                }
+                line = br.readLine()
+            }
+        } catch (ex: Exception) {
+            runUI { setLTEStatusRed() }
+        } finally {
+            urlConnection.disconnect()
+        }
+    }
+
+    fun socketCloseSafe() {
+        try { socket!!.close() } catch (ex: Exception) {}
+        stopParser()
+        socket = null
+    }
     fun runConnector() {
         var connectorThread = Thread {
             while (true) {
                 try {
+                    checkLTE()
 
                     if (hostInput.text.toString().isEmpty() || portInput.text.toString().isEmpty()) continue
                     val host = hostInput.text.toString()
@@ -329,23 +436,17 @@ class MainActivity : AppCompatActivity() {
                         // handle later
                     } else if (socket!!.isClosed || !socket!!.isConnected || !socket!!.isBound || socket!!.isInputShutdown || socket!!.isOutputShutdown) {
                         status("Closing dead connection")
-                        socket!!.close()
-                        stopParser()
-                        socket = null
-                        wifiNetwork = null
+                        socketCloseSafe()
                     } else if (socket!!.remoteSocketAddress != addr) {
                         status("Reconnecting", "from", socket!!.remoteSocketAddress.toString(), "to", addr.toString())
-                        socket!!.close()
-                        stopParser()
-                        socket = null
-                        wifiNetwork = null
+                        socketCloseSafe()
                     } else if (now - lastTimeMessageRecieved > 5000) {
                         status("Silent for 5 seconds, reconnect")
                         lastTimeMessageRecieved = now
-                        socket!!.close()
-                        stopParser()
-                        socket = null
-                        wifiNetwork = null
+                        socketCloseSafe()
+                    } else if (wifiNetwork == null) {
+                        status("Lost wifi network, reconnecting")
+                        socketCloseSafe()
                     } else {
                         // all good
                     }
@@ -353,7 +454,7 @@ class MainActivity : AppCompatActivity() {
                     if (wifiNetwork == null) {
                         ensureConnection()
                     }
-                    if (wifiNetwork == null) {
+                    if (wifiNetwork == null && wifiConnectionNeeded) {
                         status("Connection not ensured")
                         continue
                     }
@@ -368,16 +469,24 @@ class MainActivity : AppCompatActivity() {
                             socket = null
                             continue
                         }
-                        socket!!.connect(addr, 15000)
-                        socket!!.soTimeout = 15000
+                        socket!!.connect(addr, 5000)
+                        socket!!.soTimeout = 5000
                         runParser()
                         status("Connected to", host, Integer.toString(port))
                     }
 
-                } catch (exc: Exception) {
+
+                } catch (exc: ConnectException) {
+                    status("Connection failed")
+                    stopParser()
+                    socket = null
+                }  catch (exc: SocketTimeoutException) {
+                    status("Socket timed out")
+                    stopParser()
+                    socket = null
+                }  catch (exc: Exception) {
                     status(exc.javaClass.simpleName, exc.message, exc.stackTraceToString())
                     stopParser()
-                    wifiNetwork = null
                     socket = null
                 } finally {
                     Thread.sleep(1000)
@@ -444,6 +553,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun status(arg: String?, vararg args: String?) {
+        log(arg, *args)
         runUI {
             statusView.setText(arg)
             for (more in args) {

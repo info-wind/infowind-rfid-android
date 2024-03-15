@@ -22,11 +22,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:visibility="gone" >
+            android:visibility="visible" >
 
             <EditText
                 android:id="@+id/ssidInput"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
@@ -37,15 +37,25 @@
 
             <EditText
                 android:id="@+id/passInput"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:hint="Pass"
                 android:inputType="textPassword"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
                 android:text="" />
+
+            <Button
+                android:id="@+id/wifiBtn"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="0"
+                android:padding="0dp"
+                android:text="Lock 🔒" />
 
         </LinearLayout>
         
@@ -57,7 +67,7 @@
 
             <EditText
                 android:id="@+id/hostInput"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
@@ -68,9 +78,10 @@
 
             <EditText
                 android:id="@+id/portInput"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:hint="Port"
                 android:inputType="number"
@@ -78,6 +89,29 @@
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
                 android:text="" />
+
+            <Button
+                android:id="@+id/heartbeatBtn"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:layout_marginStart="6dp"
+                android:padding="0dp"
+                android:text="CON"
+                android:textColor="#FFAAAAAA"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/lteBtn"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:padding="0dp"
+                android:text="LTE"
+                android:textColor="#FFAAAAAA"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -87,23 +121,12 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/heartbeatBtn"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="0"
-                android:padding="0dp"
-                android:textColor="#FFAAAAAA"
-                android:textStyle="bold"
-                android:text="CON" />
-
-            <Button
                 android:id="@+id/atBtn"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="AT" />
 
             <Button
@@ -113,6 +136,7 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="VERSION" />
 
             <Button
@@ -122,6 +146,7 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="SYNC" />
 
         </LinearLayout>
@@ -179,6 +204,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="SCAN" />
 
             <Button
@@ -188,6 +214,7 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="FIND" />
 
             <Button
@@ -196,6 +223,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="INTERRUPT" />
 
         </LinearLayout>
@@ -211,6 +239,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="DOWNLOAD" />
 
             <Button
@@ -220,6 +249,7 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="CLEAR" />
 
             <Button
@@ -228,6 +258,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
+                android:padding="0dp"
                 android:text="REBOOT" />
 
         </LinearLayout>
@@ -252,6 +283,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
+                android:padding="0dp"
                 android:text="Send" />
 
         </LinearLayout>
