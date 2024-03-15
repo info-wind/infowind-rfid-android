@@ -235,24 +235,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun ensureConnection__DEPRECATED__() {
-        val connectivityManager = applicationContext.getApplicationContext().getSystemService(
-            CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-        val networks = connectivityManager.allNetworks
-        log(networks.toString())
-        for (network in networks) {
-            val networkInfo = connectivityManager.getNetworkInfo(network)
-            log(networkInfo!!.typeName.toString())
-            if (networkInfo!!.type == ConnectivityManager.TYPE_WIFI) {
-                wifiNetwork = network // Grabbing the Network object for later usage
-            }
-        }
-    }
-
-
-
-
     var networkCallbackConnected = false
     val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -290,94 +272,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-/*
-    fun ensureConnection2(ssid: String) {
-        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-        val configuration = WifiConfiguration()
-        configuration.SSID = "\"" + ssid + "\""
-        configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE)
-        wifiManager.addNetwork(configuration)
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-            return
-        }
-
-        val list: List<WifiConfiguration> = wifiManager.getConfiguredNetworks()
-        for (i in list) {
-            if (i.SSID != null && i.SSID == "\"" + ssid + "\"") {
-                wifiManager.disconnect()
-                wifiManager.enableNetwork(i.networkId, true)
-                wifiManager.reconnect()
-                break
-            }
-        }
-
-
-        val builder: NetworkRequest.Builder
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder = NetworkRequest.Builder()
-            builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            connectivityManager.requestNetwork(builder.build(), object : NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    val ssid: String = wifiManager.getConnectionInfo().getSSID()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        connectivityManager.bindProcessToNetwork(null)
-                        if (ssid == "\"" + Prefs.getWifiName(this@PUFMainActivity) + "\"") {
-                            connectivityManager.bindProcessToNetwork(network)
-                            connectivityManager.unregisterNetworkCallback(this)
-                        }
-                    }
-                }
-            })
-        }
-    }
-
-    fun ensureConnection1() {
-        val ssid = ssidInput.text.toString()
-        val pass = passInput.text.toString()
-
-        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-
-        if (wifiManager.connectionInfo.supplicantState == SupplicantState.DISCONNECTED) {
-            val requestBuilder = NetworkRequest.Builder()
-            requestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-            connectivityManager.requestNetwork(requestBuilder.build(), object : NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    connectivityManager.bindProcessToNetwork(network)
-                }
-                override fun onUnavailable() {
-                    super.onUnavailable()
-                }
-            })
-            /*
-
-            if (ssid.isEmpty() || pass.isEmpty())
-                return;
-
-            val conf = WifiConfiguration()
-            conf.SSID = "\"" + ssid + "\""
-            conf.preSharedKey = "\"" + pass + "\""
-            wifiManager.addNetwork(conf)
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-                return
-            }
-            var list = wifiManager.configuredNetworks
-            for (i in list) {
-                if (i.SSID != null && i.SSID == "\"" + ssid + "\"") {
-                    wifiManager.disconnect()
-                    wifiManager.enableNetwork(i.networkId, true)
-                    wifiManager.reconnect()
-                    break
-                }
-            }
-            */
-        }
-    }
-*/
-
     fun savePrefs() {
         val preferences = getPreferences(MODE_PRIVATE)
         val editor = preferences.edit()
@@ -390,23 +284,21 @@ class MainActivity : AppCompatActivity() {
         editor.commit()
     }
 
-    var checkLTECounter = 2
+    var checkLTECounter = 4
     fun checkLTE() {
-        checkLTECounter = (checkLTECounter + 1) % 3
+        checkLTECounter = (checkLTECounter + 1) % 5
         if (checkLTECounter != 0) return
-        val url = URL("https://romanovskii.com/internet_connection")
+        val url = URL("https://gstatic.com/generate_204")
         val urlConnection = url.openConnection() as HttpURLConnection
-        urlConnection.connectTimeout = 2500
         try {
-            val isr = InputStreamReader(urlConnection.inputStream, "UTF-8")
-            val br = BufferedReader(isr)
-            var line = br.readLine()
-            while (line != null) {
-                if (line.startsWith("internet_connected")) {
-                    runUI { setLTEStatusGreen() }
-                }
-                line = br.readLine()
-            }
+            urlConnection.connectTimeout = 4000
+            urlConnection.requestMethod = "GET"
+            urlConnection.connect()
+            if (urlConnection.responseCode >= 200 || urlConnection.responseCode < 400)
+                runUI { setLTEStatusGreen() }
+            else
+                runUI { setLTEStatusRed() }
+
         } catch (ex: Exception) {
             runUI { setLTEStatusRed() }
         } finally {
@@ -564,9 +456,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun runUI(r: Runnable) {
-        //runOnUiThread(r);
         mainLooperHandler.post(r)
-        //new Handler(Looper.getMainLooper()).post(r);
     }
 
     fun appendParam(sb: StringBuilder, name: String, value: String): Int? {
