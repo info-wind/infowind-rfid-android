@@ -20,83 +20,94 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:orientation="horizontal"
             android:visibility="visible" >
 
             <EditText
                 android:id="@+id/ssidInput"
+                android:nextFocusDown="@+id/passInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:hint="SSID"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
-                android:text="" />
+                android:text=""
+                android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/passInput"
+                android:nextFocusDown="@+id/hostInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:hint="Pass"
                 android:inputType="textPassword"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
-                android:text="" />
+                android:text=""
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/wifiBtn"
                 android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="3dp"
                 android:layout_weight="0"
+                android:layout_marginTop="-5dp"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Lock 🔒" />
 
         </LinearLayout>
-        
+
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/hostInput"
+                android:nextFocusDown="@+id/portInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:hint="Host"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
-                android:text="" />
+                android:text=""
+                android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/portInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:hint="Port"
                 android:inputType="number"
                 android:numeric="integer"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
-                android:text="" />
+                android:text=""
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/heartbeatBtn"
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="50dp"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:layout_weight="0"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginTop="-5dp"
                 android:padding="0dp"
                 android:text="CON"
                 android:textColor="#FFAAAAAA"
@@ -106,8 +117,9 @@
                 android:id="@+id/lteBtn"
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="50dp"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:layout_weight="0"
+                android:layout_marginTop="-5dp"
                 android:padding="0dp"
                 android:text="LTE"
                 android:textColor="#FFAAAAAA"
@@ -117,173 +129,198 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/atBtn"
                 android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="AT" />
 
             <Button
                 android:id="@+id/versionBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="VERSION" />
 
             <Button
                 android:id="@+id/syncBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="SYNC" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/scanCountInput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:hint="COUNT=1"
                 android:inputType="number"
                 android:numeric="integer"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/scanDurationInput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:hint="DURATION=inf"
                 android:inputType="number"
                 android:numeric="integer"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:textSize="14sp" />
 
             <Switch
                 android:id="@+id/persistentSw"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginTop="-5dp"
                 android:layout_weight="0"
                 android:checked="true"
-                android:text="PERSISTENT" />
+                android:text="PERSISTENT"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/scanBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="SCAN" />
 
             <Button
                 android:id="@+id/findBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="FIND" />
 
             <Button
                 android:id="@+id/interruptBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="6dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="INTERRUPT" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/downloadBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="DOWNLOAD" />
 
             <Button
                 android:id="@+id/clearBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="CLEAR" />
 
             <Button
                 android:id="@+id/rebootBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="3dp"
                 android:layout_weight="1"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="REBOOT" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/commandInput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:hint="AT"
                 android:selectAllOnFocus="true"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/sendBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:layout_weight="0"
                 android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:layout_marginTop="-5dp"
                 android:text="Send" />
 
         </LinearLayout>
@@ -297,6 +334,7 @@
             android:gravity="bottom"
             android:padding="10dp"
             android:scrollbars="vertical"
+            android:textSize="12sp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
 
@@ -308,6 +346,7 @@
             android:gravity="bottom"
             android:padding="10dp"
             android:scrollbars="vertical"
+            android:textSize="12sp"
             android:background="#AA000000"
             android:textColor="#FFFFFFFF"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />

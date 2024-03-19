@@ -1,5 +1,6 @@
 package ru.info_wind.infowind_rfid_android
 
+import android.R.id.edit
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
@@ -12,6 +13,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
+import android.text.InputFilter
+import android.text.Spanned
 import android.text.TextWatcher
 import android.text.method.ScrollingMovementMethod
 import android.view.View
@@ -132,14 +135,15 @@ class MainActivity : AppCompatActivity() {
         statusView = findViewById(R.id.statusView)
 
         val preferences = getPreferences(MODE_PRIVATE)
-        ssidInput.setText(preferences.getString("ssid", "INFOWIND_RFID_SCANNER"))
+        ssidInput.setText(preferences.getString("ssid", ""))
         passInput.setText(preferences.getString("pass", ""))
-        hostInput.setText(preferences.getString("host", "192.168.4.1"))
-        portInput.setText(preferences.getString("port", "55757"))
+        hostInput.setText(preferences.getString("host", ""))
+        portInput.setText(preferences.getString("port", ""))
         commandInput.setText(preferences.getString("command", ""))
         persistentSw.isChecked = preferences.getBoolean("persistent", true)
 
         logView.setMovementMethod(ScrollingMovementMethod())
+        statusView.setMovementMethod(ScrollingMovementMethod())
         atBtn.setOnClickListener { sendCommand("AT") }
         versionBtn.setOnClickListener(View.OnClickListener { view: View? -> sendCommand("AT+VERSION") })
         interruptBtn.setOnClickListener(View.OnClickListener { view: View? -> sendCommand("AT+INT") })
@@ -184,12 +188,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         val textWatcher = object: TextWatcher {
-            override fun afterTextChanged(s: Editable?) {}
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            override fun afterTextChanged(s: Editable?) {
                 savePrefs()
             }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         }
+        hostInput.filters = arrayOf(object : InputFilter {
+            override fun filter( source: CharSequence?, start: Int, end: Int, dest: Spanned?, dstart: Int, dend: Int ): CharSequence? {
+                if (source != null && source.length == 16 && source.matches("\\d+".toRegex())) {
+                  val host = source.subSequence(0,3).toString().toInt().toString() + "." + source.subSequence(3,6).toString().toInt().toString() + "." + source.subSequence(6,9).toString().toInt().toString() + "." + source.subSequence(9,12).toString().toInt().toString()
+                  val port = source.subSequence(12, 16).toString().toInt().toString()
+                  runUI{ portInput.setText(port) }
+                    return host
+                } else
+                    return  source
+            }
+        })
+
         ssidInput.addTextChangedListener(textWatcher)
         passInput.addTextChangedListener(textWatcher)
         hostInput.addTextChangedListener(textWatcher)
@@ -238,17 +254,14 @@ class MainActivity : AppCompatActivity() {
     var networkCallbackConnected = false
     val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            log("onAvailable()", network.toString())
             wifiNetwork = network
         }
         override fun onLost(network: Network) {
-            log("onLost()")
             wifiNetwork = null
             connectivityManager.unregisterNetworkCallback(this)
             networkCallbackConnected = false
         }
         override fun onUnavailable() {
-            log("onUnavailable()")
             wifiNetwork = null
             connectivityManager.unregisterNetworkCallback(this)
             networkCallbackConnected = false
@@ -267,7 +280,6 @@ class MainActivity : AppCompatActivity() {
             if (wifiConnectionNeeded)
                 nBuilder.setNetworkSpecifier(wfBuilder.build())
             connectivityManager.requestNetwork(nBuilder.build(), networkCallback)
-            log("NETWROK_REQUESTED()")
             networkCallbackConnected = true
         }
     }
@@ -367,7 +379,6 @@ class MainActivity : AppCompatActivity() {
                         status("Connected to", host, Integer.toString(port))
                     }
 
-
                 } catch (exc: ConnectException) {
                     status("Connection failed")
                     stopParser()
@@ -381,7 +392,7 @@ class MainActivity : AppCompatActivity() {
                     stopParser()
                     socket = null
                 } finally {
-                    Thread.sleep(1000)
+                    Thread.sleep(3000)
                 }
             }
         }
@@ -445,7 +456,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun status(arg: String?, vararg args: String?) {
-        log(arg, *args)
         runUI {
             statusView.setText(arg)
             for (more in args) {
