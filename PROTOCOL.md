@@ -78,9 +78,14 @@ Heres a shot list of supported commands:
 - `AT+CLEAR`
 
 Also the following commands are deprecated:
+<details>
+<summary>Deprecated commands</summary>
+
 - `AT+SCAN?\r\n`
 - `AT+SCAN=0\r\n`
 - `AT+SCAN=1\r\n`
+
+</details>
 
 ## Command: `AT\n` - generic handshake, check if device is present
 ```
@@ -185,7 +190,7 @@ OK
 
 ## Command: `AT+INTERRUPT\n` - interrupt a currently running command
 > **Note**  
-> Its recommended to use this instead of the deprecated ~~`AT+SCAN=0\n`~~, it is more explicit about what it does, additionaly providing info about what command was interrupted if any
+> Its recommended to use this instead of the deprecated ~~`AT+SCAN=0\r\n`~~, it is more explicit about what it does, additionaly providing info about what command was interrupted if any
 ```
 AT+INTERRUPT
 ```
@@ -357,7 +362,12 @@ NOTFOUND
 OK
 ```
 
-## Deprecated command: ~~`AT+SCAN=1\n`~~ - enable continuous scanning
+## Deprecated commands
+
+<details>
+<summary>Deprecated commands</summary>
+
+## Deprecated command: ~~`AT+SCAN=1\r\n`~~ - enable continuous scanning
 > **Warning**  
 > Deprecated since 1.4.0, use `AT+SCAN?COUNT=inf` instead
 
@@ -381,7 +391,7 @@ OK
 ...
 ```
 
-## Deprecated command: ~~`AT+SCAN=0\n`~~ - stop continuos scanning / interrupt active scanning command
+## Deprecated command: ~~`AT+SCAN=0\r\n`~~ - stop continuos scanning / interrupt active scanning command
 > **Warning**  
 > Deprecated since 1.4.0, use `AT+INTERRUPT` instead
 
@@ -393,10 +403,10 @@ Response: `OK\n` - continuos scanning disbaled or an active scanning command int
 AT+SCAN=0
 OK
 ```
-## Deprecated command: ~~`AT+SCAN?`~~ - request scan of a single label
+## Deprecated command: ~~`AT+SCAN?\r\n`~~ - request scan of a single label
 > **Warning**  
 > Deprecated since 1.4.0, use simple `AT+SCAN` instead  
-> For now, if the request wording is exactly `AT+SCAN?\n` an empty line is added after the scan result, to support backwards compatability, **this will be removed in future versions, do not rely on this!**
+> For now, if the request wording is exactly `AT+SCAN?\r\n` an empty line is added after the scan result, to support backwards compatability, **this will be removed in future versions, do not rely on this!**
 
 ```
 AT+SCAN?
@@ -413,3 +423,5 @@ AT+SCAN?
 
 OK
 ```
+
+</details>
