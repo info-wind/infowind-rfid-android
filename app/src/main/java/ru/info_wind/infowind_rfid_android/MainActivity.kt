@@ -273,17 +273,14 @@ class MainActivity : AppCompatActivity() {
     var networkCallbackConnected = false
     val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            log("onAvailable()")
             wifiNetwork = network
         }
         override fun onLost(network: Network) {
-            log("onLost()")
             wifiNetwork = null
             connectivityManager.unregisterNetworkCallback(this)
             networkCallbackConnected = false
         }
         override fun onUnavailable() {
-            log("onUnavailable()")
             wifiNetwork = null
             connectivityManager.unregisterNetworkCallback(this)
             networkCallbackConnected = false
