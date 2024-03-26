@@ -288,7 +288,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    fun ensureConnection_API30() {
+    fun ensureConnection_API29() {
         if (!networkCallbackConnected) {
             val wfBuilder = WifiNetworkSpecifier.Builder()
                 .setSsid(ssidInput.text.toString())
@@ -331,7 +331,7 @@ class MainActivity : AppCompatActivity() {
 
     fun ensureConnection() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            ensureConnection_API30()
+            ensureConnection_API29()
         } else {
             ensureConnection_API28()
         }
@@ -351,7 +351,7 @@ class MainActivity : AppCompatActivity() {
 
     fun checkLTE() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            checkLTE_API30()
+            checkLTE_API29()
         } else {
             checkLTE_API28()
         }
@@ -382,7 +382,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    fun checkLTE_API30() {
+    fun checkLTE_API29() {
         checkLTECounter = (checkLTECounter + 1) % 5
         if (checkLTECounter != 0) return
         val url = URL("https://gstatic.com/generate_204")
