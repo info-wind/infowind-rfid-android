@@ -1,14 +1,23 @@
 package ru.info_wind.infowind_rfid_android
 
-import android.R.id.edit
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.net.NetworkRequest
+import android.net.wifi.WifiConfiguration
+import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,8 +32,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -215,6 +226,14 @@ class MainActivity : AppCompatActivity() {
 
         runConnector()
         setHeartbeatStatusGray()
+
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
+                log("Provide location permission to access Wi-Fi!")
+                return
+            }
+        }
     }
 
     fun find() {
@@ -254,21 +273,25 @@ class MainActivity : AppCompatActivity() {
     var networkCallbackConnected = false
     val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
+            log("onAvailable()")
             wifiNetwork = network
         }
         override fun onLost(network: Network) {
+            log("onLost()")
             wifiNetwork = null
             connectivityManager.unregisterNetworkCallback(this)
             networkCallbackConnected = false
         }
         override fun onUnavailable() {
+            log("onUnavailable()")
             wifiNetwork = null
             connectivityManager.unregisterNetworkCallback(this)
             networkCallbackConnected = false
         }
     }
 
-    fun ensureConnection() {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun ensureConnection_API30() {
         if (!networkCallbackConnected) {
             val wfBuilder = WifiNetworkSpecifier.Builder()
                 .setSsid(ssidInput.text.toString())
@@ -284,6 +307,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun ensureConnection_API28() {
+        if (!networkCallbackConnected && wifiConnectionNeeded) {
+            val nBuilder = NetworkRequest.Builder()
+                //.clearCapabilities()
+                //.setIncludeOtherUidNetworks(true)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+
+            val ssid = ssidInput.text.toString()
+            val pass = passInput.text.toString()
+
+            if (ssid.isEmpty() || pass.isEmpty())
+                return;
+
+            val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
+            val conf = WifiConfiguration()
+            conf.SSID = "\"" + ssid + "\""
+            conf.preSharedKey = "\"" + pass + "\""
+            val netId = wifiManager.addNetwork(conf)
+            wifiManager.enableNetwork(netId, false)
+
+            connectivityManager.requestNetwork(nBuilder.build(), networkCallback)
+            networkCallbackConnected = true
+        }
+    }
+
+    fun ensureConnection() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            ensureConnection_API30()
+        } else {
+            ensureConnection_API28()
+        }
+    }
+
     fun savePrefs() {
         val preferences = getPreferences(MODE_PRIVATE)
         val editor = preferences.edit()
@@ -296,8 +352,40 @@ class MainActivity : AppCompatActivity() {
         editor.commit()
     }
 
-    var checkLTECounter = 4
     fun checkLTE() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            checkLTE_API30()
+        } else {
+            checkLTE_API28()
+        }
+    }
+
+    var checkLTECounter = 4
+    fun checkLTE_API28() {
+        for (network in connectivityManager.allNetworks) {
+            val networkInfo = connectivityManager.getNetworkInfo(network)
+            if (networkInfo!!.typeName == "MOBILE") {
+                checkLTECounter = (checkLTECounter + 1) % 5
+                if (checkLTECounter != 0) return
+                val url = URL("https://gstatic.com/generate_204")
+                val urlConnection = network.openConnection(url)as HttpURLConnection
+                try {
+                    urlConnection.connectTimeout = 4000
+                    urlConnection.requestMethod = "GET"
+                    urlConnection.connect()
+                    if (urlConnection.responseCode >= 200 || urlConnection.responseCode < 400)
+                        runUI { setLTEStatusGreen() }
+                    else
+                        runUI { setLTEStatusRed() }
+                } catch (ex: Exception) {
+                    runUI { setLTEStatusRed() }
+                } finally {
+                    urlConnection.disconnect()
+                }
+            }
+        }
+    }
+    fun checkLTE_API30() {
         checkLTECounter = (checkLTECounter + 1) % 5
         if (checkLTECounter != 0) return
         val url = URL("https://gstatic.com/generate_204")
@@ -323,6 +411,7 @@ class MainActivity : AppCompatActivity() {
         stopParser()
         socket = null
     }
+
     fun runConnector() {
         var connectorThread = Thread {
             while (true) {
