@@ -24,9 +24,9 @@ Example for Heartbeat messages in the protocol log (note the `b` in the beginnin
 b
 +hb
 +hb
-ping
+/at
 +hb
-pong
+ok
 +hb
 /scan?count=3&duration=3000
 +hb
@@ -62,7 +62,7 @@ interrupted /scan
 **Each command must be followed by the line ending synbol `\n`.**
 
 Heres a shot list of supported commands:
-- `/ping`
+- `/at`
 - `/version`
 - `/interrupt`
 - `/scan`
@@ -75,14 +75,14 @@ Heres a shot list of supported commands:
 
 </details>
 
-## Command: `/ping` - generic ping, check if device is present
+## Command: `/at` - generic handshake, check if device is present
 ```
-/ping
+/at
 ```
-Response: `pong` - scanner healthy and ready
+Response: `ok` - scanner healthy and ready
 ```
-/ping
-pong
+/at
+ok
 ```
 
 ## Command: `/version` - get device's protocol version
