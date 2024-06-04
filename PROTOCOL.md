@@ -1,136 +1,121 @@
 <p align="center"><a href="https://info-wind.ru/"><img width="70" src="./infowind.svg"></a><br>InfoWind</p>
 
-# AXELOT PDT Scanner protocol description
+# Scanner protocol description
 
-> Protocol Version: 1.8.0
+> Protocol Version: 2.0.0
 
 ## Protocol
 
-The protocol is inspired by the Hayes command set (AT command set) commonly seen in small serial devices. General information can be found at https://en.wikipedia.org/wiki/Hayes_command_set
+The protocol is based around a slimmed fown version of the HTTP protocol. All commands are valid URLs, and the responses can be of any format. The query, or params part of the commands that go after `?` are standart URL query paramers, their order does not matter, only their presence. More info can be found at https://en.wikipedia.org/wiki/Query_string
 
-The query, or params part of the commands that go after `?` are standart URL query paramers, their order does not matter, only their presence. More info can be found at https://en.wikipedia.org/wiki/Query_string
+***The protocol is to be implemented as asynchronous***, there should be no expectation that the responses to the commands will follow immedeatly after the commands were sent, because there might be other continuous commands running in that period that would send their data before the current command is recievd and parsed. `+hb` heartbeat messages also come between any commands that are running and should be handled apropriety by the side waiting for a command response.
 
-***The protocol is to be implemented as asynchronous***, there should be no expectation that the responses to the commands will follow immedeatly after the commands were sent, because there might be other continuous commands running in that period that would send their data before the current command is recievd and parsed. `+HB\n` heartbeat messages also come between any commands that are running and should be handled apropriety by the side waiting for a command response.
+## Heartbeat: `+hb` - every 1 second
 
-## Heartbeat: `+HB\n` - every 1 second
-
-Every 1 second the module send a heartbeat command `+HB\n`.
+Every 1 second the module sends a heartbeat message `+hb`.
 
 These messages are sent by an internal timer without regard for any command or even connection state between the connected systems.
 
-Please note that as `+HB\n` heartbeat messages run on an internal timer and do not wait for any connection to be established it is possible to resieve a full or even a partial `+HB\n` message right after connecting to the module before sending any `AT` commands. The system implementing this protocol must thus be resistant to receiving such partial message noise. A state machine based on the `switch` statment combined with a state contaier is advisable for implementation.
+Please note that as `+hb` heartbeat messages run on an internal timer and do not wait for any connection to be established it is possible to recieve a full or even a partial `+hb` message right after connecting to the module before sending any commands. The system implementing this protocol must thus be resistant to receiving such partial message noise. A state machine based on the `switch` statment combined with a state contaier is advisable for implementation.
 
-Example for Heartbeat messages in the protocol log (note the `B\n` in the beginning the is partial of the `+HB\n` that was being sent as the connection was being established, also note the differences in when the `+HB` is received in regards to the `AT+SCAN` and `AT+INTERRUPT` request and responses, it can be recieved between any response lines as it is running asynchronously), read on commands bellow for more:
+Example for Heartbeat messages in the protocol log (note the `b` in the beginning the is partial of the `+hb` that was being sent as the connection was being established, also note the differences in when the `+hb` is received in regards to the `/scan` and `/interrupt` request and responses, it can be recieved between any response lines as it is running asynchronously), read on commands bellow for more:
 
 ```log
-B
-+HB
-+HB
-AT
-+HB
-OK
-+HB
-AT+SCAN?COUNT=3&DURATION=3000
-+HB
+b
++hb
++hb
+ping
++hb
+pong
++hb
+/scan?count=3&duration=3000
++hb
 1,300833B2DDD9014000000032,1,-57.6,0,0,1
-+HB
-+HB
-NOTFOUND
-NOTFOUND
-OK
-+HB
-+HB
-AT+SCAN
-OK
-+HB
-+HB
-+HB
-AT+INTERRUPT
-+HB
-INTERRUPTED AT+SCAN
-OK
-AT+SCAN
-+HB
-OK
-+HB
-+HB
-AT+INTERRUPT
-INTERRUPTED AT+SCAN
-+HB
-OK
++hb
++hb
+notfound
+notfound
+ok
++hb
++hb
+/scan
+ok
++hb
++hb
++hb
+/interrupt
++hb
+interrupted /scan
+/scan
++hb
+ok
++hb
++hb
+/interrupt
+interrupted /scan
++hb
 
 ```
 
 ## Commands
 
-**Each command must be followed by the standard line ending `\n` OR `\r\n`.**
+**Each command must be followed by the line ending synbol `\n`.**
 
 Heres a shot list of supported commands:
-- `AT`
-- `AT+VERSION`
-- `AT+INTERRUPT`
-- `AT+SCAN`
-- `AT+FIND`
-- `AT+SYNC`
-- `AT+PREFS`
-- `AT+REBOOT`
-- `AT+DOWNLOAD`
-- `AT+CLEAR`
-
-Also the following commands are deprecated:
-<details>
-<summary>Deprecated commands</summary>
-
-- `AT+SCAN?\r\n`
-- `AT+SCAN=0\r\n`
-- `AT+SCAN=1\r\n`
+- `/ping`
+- `/version`
+- `/interrupt`
+- `/scan`
+- `/find`
+- `/sync`
+- `/prefs`
+- `/reboot`
+- `/download`
+- `/clear`
 
 </details>
 
-## Command: `AT\n` - generic handshake, check if device is present
+## Command: `/ping` - generic ping, check if device is present
 ```
-AT
+/ping
 ```
-Response: `OK\n` - scanner healthy and ready
+Response: `pong` - scanner healthy and ready
 ```
-AT
-OK
+/ping
+pong
 ```
 
-## Command: `AT+VERSION\n` - get device's protocol version
+## Command: `/version` - get device's protocol version
 ```
-AT+VERSION
+/version
 ```
 The response is:
-- protocol version in format of `<major>.<minor>.<patch>` followed by the standard line ending `\n`
-- the end of command `OK\n`.
+- protocol version in format of `<major>.<minor>.<patch>`
 
 ```
-AT+VERSION
+/version
 1.7.0
-OK
 ```
 
-## Command: `AT+SYNC,<remote_time>\n` - sync time between devices
+## Command: `/sync,<remote_time>` - sync time between devices
 ```
-AT+SYNC,1706532328203
+/sync,1706532328203
 ```
 The response is:
-- a key word `SYNC`
+- a key word `sync`
 - a single comma `,`
 - the remote time from the command paramenters
 - a single comma `,`
 - the current device time in milliseconds
-- the standard line ending `\n`.
 
 ```
-AT+SYNC,1706532328203
-SYNC,1706532328203,40295
+/sync,1706532328203
+sync,1706532328203,40295
 ```
 
-## Command: `AT+PREFS<params...>\n` - set or reset preferences
+## Command: `/prefs<params...>` - set or reset preferences
 ```
-AT+PREFS?ssid=Device_wifi&pass=12345678
+/prefs?ssid=device_wifi&pass=12345678
 ```
 
 Currently supported params are:
@@ -139,96 +124,89 @@ Currently supported params are:
 - `reset` - reset all prefs to defult values
 
 The response is:
-- the end of command `OK\n`.
+- the end of command `ok`.
 
 ```
-AT+PREFS?ssid=Device_wifi&pass=12345678
-OK
+/prefs?ssid=device_wifi&pass=12345678
+ok
 
-AT+PREFS?reset
-OK
+/prefs?reset
+ok
 ```
 
-## Command: `AT+REBOOT\n` - reboot software
+## Command: `/reboot` - reboot software
 ```
-AT+REBOOT
+/reboot
 ```
 No response, the device reboots. The heartbeat will go missing for a few bits while device reboots, any established connections will be lost. Mostly for debug.
 
-## Command: `AT+DOWNLOAD\n` - download stored labels
+## Command: `/download` - download stored labels
 ```
-AT+DOWNLOAD
+/download
 ```
 The response is:
-- a key word `DOWNLOAD`
+- a key word `download`
 - a single comma `,`
 - count of stored labels
-- the standard line ending `\n`
 - stored labels each on its own line
-- the end of command `OK\n`.
+- the end of command `ok`.
 
 ```
-AT+DOWNLOAD
-DOWNLOAD,3
+/download
+download,3
 1,300833B2DDD9014000000032,1,-57.6,0,0,1
 2,300833B2DDD9014000000033,1,-58.1,0,0,1
 3,300833B2DDD9014000000034,1,-52.3,0,0,1
-OK
+ok
 
 ```
-## Command: `AT+CLEAR\n` - clear stored labels from memory
+## Command: `/clear` - clear stored labels from memory
 ```
-AT+CLEAR
+/clear
 ```
 The response is:
-- the end of command `OK\n`.
+- the end of command `ok`.
 
 ```
-AT+CLEAR
-OK
+/clear
+ok
 ```
 
-## Command: `AT+INTERRUPT\n` - interrupt a currently running command
-> **Note**  
-> Its recommended to use this instead of the deprecated ~~`AT+SCAN=0\r\n`~~, it is more explicit about what it does, additionaly providing info about what command was interrupted if any
+## Command: `/interrupt` - interrupt a currently running command
 ```
-AT+INTERRUPT
+/interrupt
 ```
 
 If a **command was running**, the response is:
-- a key word `INTERRUPTED`
+- a key word `interrupted`
 - a single white space
-- a signature of the interrupted command followed by the standard line ending `\n`
-- the end of command `OK\n`.
+- a signature of the interrupted command
 ```
-AT+INTERRUPT
-INTERRUPTED AT+SCAN?COUNT=inf
-OK
+/interrupt
+interrupted /scan?count=inf
 ```
 
 If **no command was running**, the response is:
-- a key word `INTERRUPTED`
+- a key word `interrupted`
 - a single white space
-- a key word `NOTHING` followed by the standard line ending `\n`
-- the end of command `OK\n`.
+- a key word `nothing` 
 ```
-AT+INTERRUPT
-INTERRUPTED NOTHING
-OK
+/interrupt
+interrupted nothing
 ```
 
-## Command: `AT+SCAN<?params...>\n` - request a scan with the given parameters
+## Command: `/scan<?params...>` - request a scan with the given parameters
 ```
-AT+SCAN
+/scan
 ```
 
 The `<params...>` can be:
-- `COUNT` (default `1`) the amount of labels to scan and return back
-- `DURATION` (default `inf`) the amount of milliseconds to scan for
+- `count` (default `1`) the amount of labels to scan and return back
+- `duration` (default `inf`) the amount of milliseconds to scan for
 
 Each parameter can be a number or an `inf` meaning infinite.
 
-|`COUNT`|`DURATION`|Meaning
+|`count`|`duration`|Meaning
 |-|-|-|
 |n|n|Wait to scan `n` labes for `n` milliseconds|
 |n|inf|Wait to scan `n` labes infinetly|
@@ -236,18 +214,18 @@ Each parameter can be a number or an `inf` meaning infinite.
 |inf|inf|Scan all labels until explicitly interrupted|
 
 Given the default values the follwoing short versions can be used:
-- `AT+SCAN` wait indefinitly for and scan 1 label
-- `AT+SCAN?COUNT=inf` enable continuous scanning, same as the deprecated ~~`AT+SCAN=1`~~
+- `/scan` wait indefinitly for and scan 1 label
+- `/scan?count=inf` enable continuous scanning
 
 When a commands runs infintely, the labels' data is sent immedetely after it is scanned, there can be 2 types of responses to this command:
 
-If the command **will run infinetly** (both `COUNT` and `DURATION` are `inf`), the response is:
+If the command **will run infinetly** (both `count` and `duration` are `inf`), the response is:
 
-- the end of command `OK\n`, to acknowledge the succes of the command
-- infinite scanned labels' data according to <a href="#label-data-format">label data format</a>, each followed by the standard line ending `\n`.
+- the end of command `ok`, to acknowledge the succes of the command
+- infinite scanned labels' data according to <a href="#label-data-format">label data format</a>, each .
 ```
-AT+SCAN?COUNT=inf
-OK
+/scan?count=inf
+ok
 1,300833B2DDD9014000000032,1,-57.6,0,0,1
 2,300833B2DDD9014000000033,1,-58.1,0,0,1
 3,300833B2DDD9014000000034,1,-52.3,0,0,1
@@ -255,66 +233,62 @@ OK
 
 If the command **will not run infinetly**, the response is:
 
-- multiple scanned label info according to <a href="#label-data-format">label data format</a> or a <a href="#notfound">`NOTFOUND`</a> keyword, each followed by the standard line ending `\n`
-- the end of command `OK\n` to acknowledge successful scan end.
+- multiple scanned labels info according to <a href="#label-data-format">label data format</a> or a <a href="#notfound">`notfound`</a> keyword 
+- the end of command `ok` to acknowledge successful scan end.
 ```
-AT+SCAN?COUNT=3
+/scan?count=3
 1,300833B2DDD9014000000032,1,-57.6,0,0,1
 2,300833B2DDD9014000000033,1,-58.1,0,0,1
 3,300833B2DDD9014000000034,1,-52.3,0,0,1
-OK
+ok
 ```
 
-## Command: `AT+FIND?<filter&params...>\n` - search for labes using a filter with parameters
+## Command: `/find?<filter>&<params...>` - search for labes using a filter with parameters
 ```
-AT+FIND?PERSISTENT&COUNT=2&DURATION=20000
+/find?persistent&count=2&duration=20000
 ```
 
 The `filter` can be:
-- `BEST` find the labes with best RSSI, sort by it and send the best first
-- `PERSISTENT` find the labes that are the most persistent or stable, to be used on a mooving scanner to detect the labes that are moving with it
+- `best` find the labes with best RSSI, sort by it and send the best first
+- `persistent` find the labes that are the most persistent or stable, to be used on a moving scanner to detect the labes that are moving with it
 
 The `<params...>` must be numbers, no `inf` or missing values allowed:
-- `COUNT` (no default) the amount of labels to scan and return back
-- `DURATION` (no default) the amount of milliseconds to scan for
+- `count` (no default) the amount of labels to scan and return back
+- `duration` (no default) the amount of milliseconds to scan for
 
 The response is:
 
-- multiple scanned label info according to <a href="#labelq-data-format">label with quality/confidence data format</a> or a <a href="#notfound">`NOTFOUND`</a> keyword, each followed by the standard line ending `\n`
-- the end of command `OK\n` to acknowledge successful scan end.
+- multiple scanned labels info according to <a href="#labelq-data-format">label with quality/confidence data format</a> or a <a href="#notfound">`notfound`</a> keyword 
+- the end of command `ok` to acknowledge successful scan end.
 ```
-AT+FIND?PERSISTENT&COUNT=4&DURATION=20000
+/find?persistent&count=4&duration=20000
 1,300833B2DDD9014000000032,1,-57.6,0,0,1,0.988
 2,300833B2DDD9014000000033,1,-58.1,0,0,1,0.873
 3,300833B2DDD9014000000034,1,-52.3,0,0,1,0.456
-NOTFOUND
-OK
+notfound
+ok
 ```
 
 ## Errors
 
-If a command encounters an error during execution, such as recieving incorrect parameters, an error is thrown and the command completes with `OK`.
+If a command encounters an error during execution, such as recieving incorrect parameters, an error is thrown.
 
 The error syntax is a follows:
 
-- a key word `ERROR`
+- a key word `error`
 - a single white space
-- a string describing the error followed by the standard line ending `\n`
-- the end of command `OK\n`.
+- a string describing the error
 
 For example:
 ```
-AT+FIND
-ERROR Filter not provided
-OK
+/find
+error Filter not provided
 
-AT+FIND?PERSISTENT
-ERROR Count not provided
-OK
+/find?persistent
+error Count not provided
 
-AT+FIND?PERSISTENT?COUNT=inf
-ERROR Count can not be inf
-OK
+/find?persistent?count=inf
+error Count can not be inf
 ```
 
 <h2 id="label-data-format">Label data format</h2>
@@ -352,76 +326,12 @@ Data fields are as follows:
 
 
 
-## <span id="notfound">`NOTFOUND` keyword</span>
-If a `COUNT` is requested, and more labes are scanned, the latter labes are dismissed. If a `DURATION` is also provided and by the time it ends less labes are scanned then requested the missing labesl are represented in a response by a `NOTFOUND` keyword:
+## <span id="notfound">`notfound` keyword</span>
+If a `count` is requested, and more labes are scanned, the latter labes are dismissed. If a `duration` is also provided and by the time it ends less labes are scanned then requested the missing labesl are represented in a response by a `notfound` keyword:
 ```
-AT+SCAN?COUNT=3&DURATION=1000
+/scan?count=3&duration=1000
 1,300833B2DDD9014000000032,1,-57.6,0,0,1
-NOTFOUND
-NOTFOUND
-OK
+notfound
+notfound
+ok
 ```
-
-## Deprecated commands
-
-<details>
-<summary>Deprecated commands</summary>
-
-## Deprecated command: ~~`AT+SCAN=1\r\n`~~ - enable continuous scanning
-> **Warning**  
-> Deprecated since 1.4.0, use `AT+SCAN?COUNT=inf` instead
-
-```
-AT+SCAN=1
-```
-Response: `OK\n` - continous scanning enabled
-```
-AT+SCAN=1
-OK
-```
-After this the scanner starts sending label data on each line followed by the standard line ending `\n` in the <a href="#label-data-format">label data format</a> outlined below.
-```
-AT+SCAN=1
-OK
-1,300833B2DDD9014000000032,1,-57.6,0,0,1
-2,300833B2DDD9014000000033,1,-58.1,0,0,1
-3,300833B2DDD9014000000034,1,-52.3,0,0,1
-4,300833B2DDD9014000000035,1,-55.8,0,0,1
-5,300833B2DDD9014000000036,1,-51.4,0,0,1
-...
-```
-
-## Deprecated command: ~~`AT+SCAN=0\r\n`~~ - stop continuos scanning / interrupt active scanning command
-> **Warning**  
-> Deprecated since 1.4.0, use `AT+INTERRUPT` instead
-
-```
-AT+SCAN=0
-```
-Response: `OK\n` - continuos scanning disbaled or an active scanning command interrupted
-```
-AT+SCAN=0
-OK
-```
-## Deprecated command: ~~`AT+SCAN?\r\n`~~ - request scan of a single label
-> **Warning**  
-> Deprecated since 1.4.0, use simple `AT+SCAN` instead  
-> For now, if the request wording is exactly `AT+SCAN?\r\n` an empty line is added after the scan result, to support backwards compatability, **this will be removed in future versions, do not rely on this!**
-
-```
-AT+SCAN?
-``` 
-Response: `1,300833B2DDD9014000000032,1,-57.6,0,0,1\n\nOK\n`  
-The response is:
-- scanned label info according to <a href="#label-data-format">label data format</a> followed by the standard line ending `\n`
-- an empty line `\n`
-- the end of command `OK\n`.
-
-```
-AT+SCAN?
-1,300833B2DDD9014000000032,1,-57.6,0,0,1
-
-OK
-```
-
-</details>
