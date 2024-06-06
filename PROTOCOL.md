@@ -2,7 +2,7 @@
 
 # AXELOT PDT Scanner protocol description
 
-> Protocol Version: 1.8.0
+> Protocol Version: 1.8.1
 
 ## Protocol
 
