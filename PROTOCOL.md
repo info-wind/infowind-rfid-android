@@ -69,7 +69,7 @@ Heres a short list of supported commands:
 - [`AT`](#AT)
 - [`AT+VERSION`](#VERSION)
 - [`AT+INTERRUPT`](#INTERRUPT)
-- [`AT+SCAN`](#SCAN)Обновленный протокол
+- [`AT+SCAN`](#SCAN)
 - [`AT+FIND`](#FIND)
 - [`AT+SYNC`](#SYNC)
 - [`AT+PREFS`](#PREFS)
