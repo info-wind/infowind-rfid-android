@@ -69,7 +69,7 @@ Heres a short list of supported commands:
 - [`AT`](#AT)
 - [`AT+VERSION`](#VERSION)
 - [`AT+INTERRUPT`](#INTERRUPT)
-- [`AT+SCAN`](#SCAN)
+- [`AT+SCAN`](#SCAN)Обновленный протокол
 - [`AT+FIND`](#FIND)
 - [`AT+SYNC`](#SYNC)
 - [`AT+PREFS`](#PREFS)
@@ -124,6 +124,8 @@ OK
 ```
 AT+SYNC,1706532328203
 ```
+The single parameter following the comma is `remote_time` - the number of milliseconds elapsed since the epoch, which is defined as the midnight at the beginning of January 1, 1970, UTC.
+
 The response is:
 - a key word `SYNC`
 - a single comma `,`
@@ -135,6 +137,15 @@ The response is:
 ```
 AT+SYNC,1706532328203
 SYNC,1706532328203,40295
+```
+
+Also an error can be thrown if the remote time is clearly incorrect or earlier then the internal timekeeping of the device.
+
+```
+AT+SYNC,1706532328203
+SYNC,1706532328203,40295
+AT+SYNC,10
+ERROR Can not time sync, timestamp in the past relative to device time.
 ```
 
 ## <span id="PREFS"/> Command: `AT+PREFS<params...>\n` - set or reset preferences
