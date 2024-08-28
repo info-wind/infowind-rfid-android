@@ -96,7 +96,7 @@ Any other command would throw an [error](#ERROR). In order to unlock the full co
 
 </details>
 
-## <span id="AT"/> Command: `AT\n` - generic handshake, check if device is present<span id="AT"/>
+## <span id="AT"></span> Command: `AT\n` - generic handshake, check if device is present
 ```
 AT
 ```
@@ -106,7 +106,7 @@ AT
 OK
 ```
 
-## <span id="VERSION"/> Command: `AT+VERSION\n` - get device's protocol version
+## <span id="VERSION"></span> Command: `AT+VERSION\n` - get device's protocol version
 ```
 AT+VERSION
 ```
@@ -120,7 +120,7 @@ AT+VERSION
 OK
 ```
 
-## <span id="SYNC"/> Command: `AT+SYNC,<remote_time>\n` - sync time between devices
+## <span id="SYNC"></span> Command: `AT+SYNC,<remote_time>\n` - sync time between devices
 ```
 AT+SYNC,1706532328203
 ```
@@ -148,7 +148,7 @@ AT+SYNC,10
 ERROR Can not time sync, timestamp in the past relative to device time.
 ```
 
-## <span id="PREFS"/> Command: `AT+PREFS<params...>\n` - set or reset preferences
+## <span id="PREFS"></span> Command: `AT+PREFS<params...>\n` - set or reset preferences
 ```
 AT+PREFS?ssid=Device_wifi&pass=12345678
 ```
@@ -169,13 +169,13 @@ AT+PREFS?reset
 OK
 ```
 
-## <span id="REBOOT"/> Command: `AT+REBOOT\n` - reboot software
+## <span id="REBOOT"></span> Command: `AT+REBOOT\n` - reboot software
 ```
 AT+REBOOT
 ```
 No response, the device reboots. The heartbeat will go missing for a few bits while device reboots, any established connections will be lost. Mostly for debug.
 
-## <span id="DOWNLOAD"/> Command: `AT+DOWNLOAD\n` - download stored labels
+## <span id="DOWNLOAD"></span> Command: `AT+DOWNLOAD\n` - download stored labels
 ```
 AT+DOWNLOAD
 ```
@@ -196,7 +196,7 @@ DOWNLOAD,3
 OK
 
 ```
-## <span id="CLEAR"/> Command: `AT+CLEAR\n` - clear stored labels from memory
+## <span id="CLEAR"></span> Command: `AT+CLEAR\n` - clear stored labels from memory
 ```
 AT+CLEAR
 ```
@@ -208,7 +208,7 @@ AT+CLEAR
 OK
 ```
 
-## <span id="INTERRUPT"/> Command: `AT+INTERRUPT\n` - interrupt a currently running command
+## <span id="INTERRUPT"></span> Command: `AT+INTERRUPT\n` - interrupt a currently running command
 > **Note**  
 > Its recommended to use this instead of the deprecated ~~`AT+SCAN=0\r\n`~~, it is more explicit about what it does, additionaly providing info about what command was interrupted if any
 ```
@@ -237,7 +237,7 @@ INTERRUPTED NOTHING
 OK
 ```
 
-## <span id="SCAN"/> Command: `AT+SCAN<?params...>\n` - request a scan with the given parameters
+## <span id="SCAN"></span> Command: `AT+SCAN<?params...>\n` - request a scan with the given parameters
 ```
 AT+SCAN
 ```
@@ -285,7 +285,7 @@ AT+SCAN?COUNT=3
 OK
 ```
 
-## <span id="FIND"/> Command: `AT+FIND?<filter&params...>\n` - search for labes using a filter with parameters
+## <span id="FIND"></span> Command: `AT+FIND?<filter&params...>\n` - search for labes using a filter with parameters
 ```
 AT+FIND?PERSISTENT&COUNT=2&DURATION=20000
 ```
@@ -311,7 +311,7 @@ NOTFOUND
 OK
 ```
 
-## <span id="ERROR"/> Errors
+## <span id="ERROR"></span> Errors
 
 If a command encounters an error during execution, such as recieving incorrect parameters, an error is thrown and the command completes with `OK`.
 
@@ -336,7 +336,7 @@ ERROR Count can not be inf
 OK
 ```
 
-## <span id="WARNING"/> Warnings
+## <span id="WARNING"></span> Warnings
 
 Same as errors, but do not block command execution. Inform the user that something is amiss and might require attention.
 
@@ -388,7 +388,7 @@ Data fields are as follows:
 
 
 
-## <span id="notfound"></span>`NOTFOUND` keyword
+## <span id="NOTFOUND"></span>`NOTFOUND` keyword
 If a `COUNT` is requested, and more labes are scanned, the latter labes are dismissed. If a `DURATION` is also provided and by the time it ends less labes are scanned then requested the missing labesl are represented in a response by a `NOTFOUND` keyword:
 ```
 AT+SCAN?COUNT=3&DURATION=1000
