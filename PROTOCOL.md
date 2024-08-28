@@ -388,7 +388,7 @@ Data fields are as follows:
 
 
 
-## <span id="notfound">`NOTFOUND` keyword</span>
+## <span id="notfound"></span>`NOTFOUND` keyword
 If a `COUNT` is requested, and more labes are scanned, the latter labes are dismissed. If a `DURATION` is also provided and by the time it ends less labes are scanned then requested the missing labesl are represented in a response by a `NOTFOUND` keyword:
 ```
 AT+SCAN?COUNT=3&DURATION=1000
