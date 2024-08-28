@@ -66,26 +66,26 @@ OK
 **Each command must be followed by the standard line ending `\n` OR `\r\n`.**
 
 Heres a short list of supported commands:
-- [`AT`](#AT)
-- [`AT+VERSION`](#VERSION)
-- [`AT+INTERRUPT`](#INTERRUPT)
-- [`AT+SCAN`](#SCAN)
-- [`AT+FIND`](#FIND)
-- [`AT+SYNC`](#SYNC)
-- [`AT+PREFS`](#PREFS)
-- [`AT+REBOOT`](#REBOOT)
-- [`AT+DOWNLOAD`](#DOWNLOAD)
-- [`AT+CLEAR`](#CLEAR)
+- [`AT`](#at)
+- [`AT+VERSION`](#version)
+- [`AT+INTERRUPT`](#interrupt)
+- [`AT+SCAN`](#scan)
+- [`AT+FIND`](#find)
+- [`AT+SYNC`](#sync)
+- [`AT+PREFS`](#prefs)
+- [`AT+REBOOT`](#reboot)
+- [`AT+DOWNLOAD`](#download)
+- [`AT+CLEAR`](#clear)
 
 ### First connection after boot
 
 After any boot only a subset of commands considered basic would work:
-- [`AT`](#AT)
-- [`AT+VERSION`](#VERSION)
-- [`AT+SYNC`](#SYNC)
-- [`AT+REBOOT`](#REBOOT)
+- [`AT`](#at)
+- [`AT+VERSION`](#version)
+- [`AT+SYNC`](#sync)
+- [`AT+REBOOT`](#reboot)
 
-Any other command would throw an [error](#ERROR). In order to unlock the full commands set an [`AT+SYNC`](#SYNC) command needs to be sent with the current time (see command details for more). After the time betweeen the device and the system has been synced the system would work as usual.
+Any other command would throw an [error](#error). In order to unlock the full commands set an [`AT+SYNC`](#sync) command needs to be sent with the current time (see command details for more). After the time betweeen the device and the system has been synced the system would work as usual.
 
 <details>
 <summary>Deprecated commands</summary>
@@ -96,7 +96,7 @@ Any other command would throw an [error](#ERROR). In order to unlock the full co
 
 </details>
 
-## <span id="AT"></span> Command: `AT\n` - generic handshake, check if device is present
+## <span id="at"></span> Command: `AT\n` - generic handshake, check if device is present
 ```
 AT
 ```
@@ -106,7 +106,7 @@ AT
 OK
 ```
 
-## <span id="VERSION"></span> Command: `AT+VERSION\n` - get device's protocol version
+## <span id="version"></span> Command: `AT+VERSION\n` - get device's protocol version
 ```
 AT+VERSION
 ```
@@ -120,7 +120,7 @@ AT+VERSION
 OK
 ```
 
-## <span id="SYNC"></span> Command: `AT+SYNC,<remote_time>\n` - sync time between devices
+## <span id="sync"></span> Command: `AT+SYNC,<remote_time>\n` - sync time between devices
 ```
 AT+SYNC,1706532328203
 ```
@@ -148,7 +148,7 @@ AT+SYNC,10
 ERROR Can not time sync, timestamp in the past relative to device time.
 ```
 
-## <span id="PREFS"></span> Command: `AT+PREFS<params...>\n` - set or reset preferences
+## <span id="prefs"></span> Command: `AT+PREFS<params...>\n` - set or reset preferences
 ```
 AT+PREFS?ssid=Device_wifi&pass=12345678
 ```
@@ -169,13 +169,13 @@ AT+PREFS?reset
 OK
 ```
 
-## <span id="REBOOT"></span> Command: `AT+REBOOT\n` - reboot software
+## <span id="reboot"></span> Command: `AT+REBOOT\n` - reboot software
 ```
 AT+REBOOT
 ```
 No response, the device reboots. The heartbeat will go missing for a few bits while device reboots, any established connections will be lost. Mostly for debug.
 
-## <span id="DOWNLOAD"></span> Command: `AT+DOWNLOAD\n` - download stored labels
+## <span id="download"></span> Command: `AT+DOWNLOAD\n` - download stored labels
 ```
 AT+DOWNLOAD
 ```
@@ -196,7 +196,7 @@ DOWNLOAD,3
 OK
 
 ```
-## <span id="CLEAR"></span> Command: `AT+CLEAR\n` - clear stored labels from memory
+## <span id="clear"></span> Command: `AT+CLEAR\n` - clear stored labels from memory
 ```
 AT+CLEAR
 ```
@@ -208,7 +208,7 @@ AT+CLEAR
 OK
 ```
 
-## <span id="INTERRUPT"></span> Command: `AT+INTERRUPT\n` - interrupt a currently running command
+## <span id="interrupt"></span> Command: `AT+INTERRUPT\n` - interrupt a currently running command
 > **Note**  
 > Its recommended to use this instead of the deprecated ~~`AT+SCAN=0\r\n`~~, it is more explicit about what it does, additionaly providing info about what command was interrupted if any
 ```
@@ -237,7 +237,7 @@ INTERRUPTED NOTHING
 OK
 ```
 
-## <span id="SCAN"></span> Command: `AT+SCAN<?params...>\n` - request a scan with the given parameters
+## <span id="scan"></span> Command: `AT+SCAN<?params...>\n` - request a scan with the given parameters
 ```
 AT+SCAN
 ```
@@ -285,7 +285,7 @@ AT+SCAN?COUNT=3
 OK
 ```
 
-## <span id="FIND"></span> Command: `AT+FIND?<filter&params...>\n` - search for labes using a filter with parameters
+## <span id="find"></span> Command: `AT+FIND?<filter&params...>\n` - search for labes using a filter with parameters
 ```
 AT+FIND?PERSISTENT&COUNT=2&DURATION=20000
 ```
@@ -311,7 +311,7 @@ NOTFOUND
 OK
 ```
 
-## <span id="ERROR"></span> Errors
+## <span id="error"></span> Errors
 
 If a command encounters an error during execution, such as recieving incorrect parameters, an error is thrown and the command completes with `OK`.
 
@@ -336,7 +336,7 @@ ERROR Count can not be inf
 OK
 ```
 
-## <span id="WARNING"></span> Warnings
+## <span id="warning"></span> Warnings
 
 Same as errors, but do not block command execution. Inform the user that something is amiss and might require attention.
 
@@ -388,7 +388,7 @@ Data fields are as follows:
 
 
 
-## <span id="NOTFOUND"></span>`NOTFOUND` keyword
+## <span id="notfound"></span>`NOTFOUND` keyword
 If a `COUNT` is requested, and more labes are scanned, the latter labes are dismissed. If a `DURATION` is also provided and by the time it ends less labes are scanned then requested the missing labesl are represented in a response by a `NOTFOUND` keyword:
 ```
 AT+SCAN?COUNT=3&DURATION=1000
