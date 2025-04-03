@@ -207,6 +207,7 @@ class MainActivity : AppCompatActivity() {
         }
         hostInput.filters = arrayOf(object : InputFilter {
             override fun filter( source: CharSequence?, start: Int, end: Int, dest: Spanned?, dstart: Int, dend: Int ): CharSequence? {
+                System.out.println(source)
                 if (source != null && source.length == 16 && source.matches("\\d+".toRegex())) {
                   val host = source.subSequence(0,3).toString().toInt().toString() + "." + source.subSequence(3,6).toString().toInt().toString() + "." + source.subSequence(6,9).toString().toInt().toString() + "." + source.subSequence(9,12).toString().toInt().toString()
                   val port = source.subSequence(12, 16).toString().toInt().toString()
